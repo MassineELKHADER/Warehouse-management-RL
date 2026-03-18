@@ -1,0 +1,19 @@
+# Shared base config — all scenario yamls inherit/override these values
+
+env:
+  n_warehouses: 4
+  max_inventory: 100        # max inventory per warehouse at reset
+  demand_model: poisson     # "poisson" | "gaussian" | "seasonal"
+  demand_mean: 10.0
+  demand_std: 3.0           # used only for gaussian
+  lambda_penalty: 2.0       # λ: weight on unmet demand in reward
+  gamma: 0.99               # discount factor
+  episode_length: 50        # steps per episode
+
+training:
+  n_episodes: 500
+  eval_every: 50            # evaluate every N episodes
+  seeds: [42, 123, 7]       # run all agents with these 3 seeds
+
+cost_matrix: null           # null = random symmetric matrix at env init
+                            # or provide an (N×N) list for fixed costs
