@@ -1,6 +1,4 @@
 """
-Warehouse Redistribution Environment — P1 owns this file.
-
 No gym dependency. Plain Python + NumPy.
 
 State  : dict with keys
@@ -24,8 +22,8 @@ class WarehouseEnv:
         self.max_inventory = cfg.get("max_inventory", 100) ## Max inventory per warehouse
         self.lam = cfg.get("lambda_penalty", 2.0) ## Penalty weight for unmet demand
         self.episode_length = cfg.get("episode_length", 50) ## Steps per episode
-
-        self._rng = np.random.default_rng(seed)
+ 
+        self._rng = np.random.default_rng(seed) # reproducible randomness
         self._demand_model = make_demand_model(cfg)
 
         # Cost matrix: symmetric, zeros on diagonal
@@ -38,7 +36,15 @@ class WarehouseEnv:
             c = (c + c.T) / 2
             np.fill_diagonal(c, 0.0)
             self.cost_matrix = c
-
+        
+        ## State variables 
+        """
+        state = {
+                "inventory": I,        # shape (n_warehouses,)
+                "demand": D,           # shape (n_warehouses,)
+                "time": t,             # _step_count, a scalar
+            }
+        """
         self._inventory: np.ndarray = np.zeros(self.n, dtype=np.float32)
         self._demand: np.ndarray = np.zeros(self.n, dtype=np.float32)
         self._step_count: int = 0
@@ -61,7 +67,7 @@ class WarehouseEnv:
 
     def step(self, action: np.ndarray) -> tuple[dict, float, bool, dict]:
         """
-        Apply transport matrix T (shape N×N), advance demand, return transition.
+        Apply transport matrix T (shape NxN), advance demand, return transition.
 
         Returns (next_state, reward, done, info)
         """
@@ -140,8 +146,13 @@ class WarehouseEnv:
           - T[i,j] >= 0
           - T[i,i] = 0  (no self-shipment)
           - sum_j T[i,j] <= inventory[i]  (can't ship more than available)
+
+        Whatever "crazy" thing the agent outputs, I rescale it so it respects physics
         """
         T = np.array(action, dtype=np.float32)
+        ## we can't take any real number as an action, 
+        # so we clip negatives to 0 (transport positive quantity only)
+        # and enforce zero diagonal (no transport to self)
         T = np.clip(T, 0.0, None)
         np.fill_diagonal(T, 0.0)
 

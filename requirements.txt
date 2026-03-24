@@ -5,5 +5,7 @@ wandb>=0.18
 pyyaml>=6.0
 numpy>=1.26
 matplotlib>=3.8
+seaborn>=0.13
+networkx>=3.2
 pandas>=2.1
 python-dotenv>=1.0
