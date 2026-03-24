@@ -54,13 +54,13 @@ class SeasonalDemand:
 
 def make_demand_model(cfg: dict):
     """Factory: build a demand model from config dict."""
-    model_type = cfg.get("demand_model", "poisson")
-    mean = cfg.get("demand_mean", 10.0)
+    model_type = cfg.get("env", {}).get("demand_model", "poisson")
+    mean = cfg.get("env", {}).get("demand_mean", 10.0)
 
     if model_type == "poisson":
         return PoissonDemand(mean=mean)
     elif model_type == "gaussian":
-        return GaussianDemand(mean=mean, std=cfg.get("demand_std", 3.0))
+        return GaussianDemand(mean=mean, std=cfg.get("env", {}).get("demand_std", 3.0))
     elif model_type == "seasonal":
         return SeasonalDemand(mean=mean)
     else:

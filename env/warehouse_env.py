@@ -18,10 +18,10 @@ from env.demand_models import make_demand_model
 
 class WarehouseEnv:
     def __init__(self, cfg: dict, seed: int = 42):
-        self.n = cfg["n_warehouses"] ## Number of warehouses
-        self.max_inventory = cfg.get("max_inventory", 100) ## Max inventory per warehouse
-        self.lam = cfg.get("lambda_penalty", 2.0) ## Penalty weight for unmet demand
-        self.episode_length = cfg.get("episode_length", 50) ## Steps per episode
+        self.n = cfg["env"]["n_warehouses"] ## Number of warehouses
+        self.max_inventory = cfg.get("env", {}).get("max_inventory", 100) ## Max inventory per warehouse
+        self.lam = cfg.get("env", {}).get("lambda_penalty", 2.0) ## Penalty weight for unmet demand
+        self.episode_length = cfg.get("env", {}).get("episode_length", 50) ## Steps per episode
  
         self._rng = np.random.default_rng(seed) # reproducible randomness
         self._demand_model = make_demand_model(cfg)
