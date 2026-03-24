@@ -1,6 +1,4 @@
 """
-No gym dependency. Plain Python + NumPy.
-
 State  : dict with keys
     "inventory" : (N,)  float32
     "demand"    : (N,)  float32
