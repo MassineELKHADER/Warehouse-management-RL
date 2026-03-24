@@ -2,7 +2,7 @@
 
 env:
   n_warehouses: 4
-  max_inventory: 100        # max inventory per warehouse at reset
+  max_inventory: 10000        # max inventory per warehouse at reset
   demand_model: poisson     # "poisson" | "gaussian" | "seasonal"
   demand_mean: 10.0
   demand_std: 3.0           # used only for gaussian
