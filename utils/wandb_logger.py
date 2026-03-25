@@ -74,16 +74,14 @@ class WandbLogger:
         missing = REQUIRED_METRICS - metrics.keys()
         if missing:
             raise ValueError(f"WandbLogger: missing required metrics: {missing}")
-        # Prefix all metrics with train/
+        # Prefix all metrics with train/; use episode as the x-axis step
         prefixed = {f"train/{k}": v for k, v in metrics.items()}
-        prefixed["episode"] = episode
-        self.run.log(prefixed)
+        self.run.log(prefixed, step=episode)
 
     def log_eval(self, metrics: dict, episode: int) -> None:
         """Log evaluation metrics (prefixed with eval/)."""
         prefixed = {f"eval/{k}": v for k, v in metrics.items()}
-        prefixed["episode"] = episode
-        self.run.log(prefixed)
+        self.run.log(prefixed, step=episode)
 
     def log(self, data: dict, step: int | None = None) -> None:
         """Generic log for arbitrary metrics (loss, alpha, etc.)."""
