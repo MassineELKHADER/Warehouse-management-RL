@@ -3,17 +3,28 @@
 env:
   n_warehouses: 4
   max_inventory: 10000        # max inventory per warehouse at reset
-  demand_model: poisson     # "poisson" | "gaussian" | "seasonal"
+  demand_model: poisson       # "poisson" | "gaussian" | "seasonal"
   demand_mean: 10.0
-  demand_std: 3.0           # used only for gaussian
-  lambda_penalty: 2.0       # λ: weight on unmet demand in reward
-  gamma: 0.99               # discount factor
-  episode_length: 50        # steps per episode
+  demand_std: 3.0             # used only for gaussian
+  lambda_penalty: 2.0         # λ: weight on unmet demand in reward
+  gamma: 0.99                 # discount factor
+  episode_length: 50          # steps per episode
+
+  # Emergency replenishment from an external supplier.
+  # If enabled, any shortfall after shipping is auto-filled at cost_per_unit >> c_ij.
+  # Set enabled: true to prevent permanent inventory depletion over long episodes.
+  external_supplier:
+    enabled: True
+    cost_per_unit: 50.0       # should be >> max transport cost (~2.0)
 
 training:
   n_episodes: 500
-  eval_every: 50            # evaluate every N episodes
-  seeds: [42, 123, 7]       # run all agents with these 3 seeds
+  eval_every: 50              # evaluate every N episodes
+  seeds: [42, 123, 7]         # run all agents with these 3 seeds
 
-cost_matrix: null           # null = random symmetric matrix at env init
-                            # or provide an (N×N) list for fixed costs
+# Cost matrix mode:
+#   null / "random" : symmetric random, Uniform(0.5, 2.0)
+#   "hub"           : hub-and-spoke — ceil(hub_fraction * N) hubs with tiered costs
+#   list[list]      : explicit N×N matrix
+cost_matrix: "hub"
+hub_fraction: 0.2             # fraction of warehouses that are hubs (hub mode only)
