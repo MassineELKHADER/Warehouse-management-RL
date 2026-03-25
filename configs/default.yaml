@@ -14,7 +14,7 @@ env:
   # If enabled, any shortfall after shipping is auto-filled at cost_per_unit >> c_ij.
   # Set enabled: true to prevent permanent inventory depletion over long episodes.
   external_supplier:
-    enabled: True
+    enabled: False
     cost_per_unit: 50.0       # should be >> max transport cost (~2.0)
 
 training:

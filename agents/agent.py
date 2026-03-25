@@ -1,10 +1,10 @@
 """
-Agent — combines any BasePolicy with any BaseTrainer into a BaseAgent.
+Agent - combines any BasePolicy with any BaseTrainer into a BaseAgent.
 
 This is the glue layer between the modular policy/trainer system and the
 existing train.py / evaluate.py entry points, which only call:
-    agent.act(state)   → (N, N) transport matrix
-    agent.update(batch) → metrics dict
+    agent.act(state)   -> (N, N) transport matrix
+    agent.update(batch) -> metrics dict
     agent.save(path)
     agent.load(path)
 
@@ -14,11 +14,11 @@ train.py calls act() once per step and collects a batch dict with keys:
     states, actions, rewards, next_states, dones
 
 act() additionally stores internally:
-    raw_actions   — the raw distribution sample BEFORE projection
+    raw_actions   - the raw distribution sample BEFORE projection
                     (needed for log_prob recomputation in PPO/REINFORCE/GRPO)
-    log_probs     — log prob at sample time (used as old_log_probs in PPO/GRPO)
-    entropies     — entropy at each step
-    encoded_obs   — policy.encode_obs(state) for batching at update time
+    log_probs     - log prob at sample time (used as old_log_probs in PPO/GRPO)
+    entropies     - entropy at each step
+    encoded_obs   - policy.encode_obs(state) for batching at update time
 
 update() merges the external batch with the internally stored data and
 passes the augmented batch to trainer.update(batch, policy).
@@ -53,7 +53,7 @@ class Agent(BaseAgent):
     ----------
     policy       : any BasePolicy subclass
     trainer      : any BaseTrainer subclass
-    n_warehouses : N — needed to reshape flat action → (N, N) matrix
+    n_warehouses : N - needed to reshape flat action -> (N, N) matrix
     """
 
     def __init__(self, policy: BasePolicy, trainer: BaseTrainer, n_warehouses: int):
@@ -83,7 +83,7 @@ class Agent(BaseAgent):
             "encoded_obs": self._policy.encode_obs(state), # for batching
         })
 
-        # Convert flat action to (N, N) — abs() keeps values positive;
+        # Convert flat action to (N, N) - abs() keeps values positive;
         # env._project_action() handles the remaining constraints.
         T = np.abs(flat_action).reshape(self._n, self._n)
         return T

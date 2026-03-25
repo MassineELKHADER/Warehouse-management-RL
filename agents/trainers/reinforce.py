@@ -41,7 +41,7 @@ class REINFORCETrainer(BaseTrainer):
         self,
         lr: float = 3e-4,
         gamma: float = 0.99,
-        entropy_coef: float = 0.01,
+        entropy_coef: float = 0.001,
         value_coef: float = 0.5,
         baseline: str = "mean",
     ):

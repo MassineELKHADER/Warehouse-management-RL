@@ -14,9 +14,9 @@ New-style (modular):
 Legacy shortcuts (--agent maps to a fixed policy+trainer pair):
     python train.py --agent random   --config small  --seed 42
     python train.py --agent greedy   --config small  --seed 42
-    python train.py --agent ppo      --config medium --seed 42   → mlp + ppo
-    python train.py --agent sac      --config medium --seed 42   → mlp + sac
-    python train.py --agent gnn      --config large  --seed 42   → gnn + ppo
+    python train.py --agent ppo      --config medium --seed 42   -> mlp + ppo
+    python train.py --agent sac      --config medium --seed 42   -> mlp + sac
+    python train.py --agent gnn      --config large  --seed 42   -> gnn + ppo
 """
 
 import argparse
@@ -88,11 +88,20 @@ def make_agent(policy_name: str, trainer_name: str | None, cfg: dict, env):
     # --- Modular agents -------------------------------------------------
     from agents.agent import Agent
     from agents.policies import MLPPolicy, ActorCriticPolicy, GNNPolicy
+    from agents.policies.base_policy import make_normalized_extractor
+
+    # Normalise observations so the network sees values in ~[0, 1]
+    max_inv      = cfg["env"].get("max_inventory", 100.0)
+    demand_mean  = cfg["env"].get("demand_mean", 10.0)
+    demand_scale = demand_mean * 3.0          # ~3σ upper bound
+    norm_extractor = make_normalized_extractor(max_inv, demand_scale)
 
     if policy_name == "mlp":
-        policy = MLPPolicy(obs_dim=obs_dim, action_dim=act_dim)
+        policy = MLPPolicy(obs_dim=obs_dim, action_dim=act_dim,
+                           obs_extractor=norm_extractor)
     elif policy_name == "ac":
-        policy = ActorCriticPolicy(obs_dim=obs_dim, action_dim=act_dim)
+        policy = ActorCriticPolicy(obs_dim=obs_dim, action_dim=act_dim,
+                                   obs_extractor=norm_extractor)
     elif policy_name == "gnn":
         policy = GNNPolicy(cost_matrix=env.cost_matrix)
     else:

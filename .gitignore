@@ -1,5 +1,6 @@
 # Sensitive / project files
 .env
+CLAUDE.md
 *.pdf
 
 # Python

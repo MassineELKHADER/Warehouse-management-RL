@@ -30,6 +30,26 @@ def default_obs_extractor(state: dict) -> np.ndarray:
     return np.concatenate([state["inventory"], state["demand"]])
 
 
+def make_normalized_extractor(
+    max_inventory: float,
+    demand_scale: float,
+) -> "Callable[[dict], np.ndarray]":
+    """
+    Return an obs_extractor that normalises inventory to [0, 1] and demand to
+    [0, 1] (approximately) before feeding to the network.
+
+    Parameters
+    ----------
+    max_inventory : env.max_inventory  (e.g. 10000)
+    demand_scale  : upper bound for demand normalisation, e.g. 3 * demand_mean
+    """
+    def _extractor(state: dict) -> np.ndarray:
+        inv = np.asarray(state["inventory"], dtype=np.float32) / max_inventory
+        dem = np.asarray(state["demand"],    dtype=np.float32) / demand_scale
+        return np.concatenate([inv, dem])
+    return _extractor
+
+
 class BasePolicy(ABC, nn.Module):
     """
     Abstract base for all policy networks.

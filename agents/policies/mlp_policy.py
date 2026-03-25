@@ -1,9 +1,9 @@
 """
-MLPPolicy — Gaussian policy over the flattened (N*N) transport matrix.
+MLPPolicy - Gaussian policy over the flattened (N*N) transport matrix.
 
 Architecture
 ------------
-  obs (2*N) → Linear → Tanh → Linear → Tanh → mean_head (N*N)
+  obs (2*N) -> Linear -> Tanh -> Linear -> Tanh -> mean_head (N*N)
                                               + log_std  (N*N, learnable param)
 
 The policy outputs a factored Gaussian N(mean, diag(std²)) over the flat
@@ -29,7 +29,7 @@ class MLPPolicy(BasePolicy):
     Parameters
     ----------
     obs_dim       : input dimension (default 2*N for inventory + demand)
-    action_dim    : output dimension (N*N — flat transport matrix)
+    action_dim    : output dimension (N*N - flat transport matrix)
     hidden        : hidden layer width
     obs_extractor : optional callable to change what features are fed in
     """
