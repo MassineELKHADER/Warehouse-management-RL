@@ -83,9 +83,9 @@ class Agent(BaseAgent):
             "encoded_obs": self._policy.encode_obs(state), # for batching
         })
 
-        # Convert flat action to (N, N) - abs() keeps values positive;
-        # env._project_action() handles the remaining constraints.
-        T = np.abs(flat_action).reshape(self._n, self._n)
+        # Pass raw action to env; _project_action() clips negatives to 0
+        # and enforces all other constraints (diagonal=0, row sums ≤ inventory).
+        T = flat_action.reshape(self._n, self._n)
         return T
 
     def update(self, batch: dict) -> dict:

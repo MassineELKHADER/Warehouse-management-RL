@@ -58,7 +58,7 @@ class GRPOTrainer(BaseTrainer):
         clip_eps: float = 0.2,
         group_size: int = 8,
         n_epochs: int = 1,
-        entropy_coef: float = 0.01,
+        entropy_coef: float = 0.0,
         eps: float = 1e-8,
     ):
         self.gamma        = gamma

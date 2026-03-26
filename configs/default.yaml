@@ -2,11 +2,11 @@
 
 env:
   n_warehouses: 4
-  max_inventory: 10000        # max inventory per warehouse at reset
+  max_inventory: 500          # max inventory per warehouse at reset
   demand_model: poisson       # "poisson" | "gaussian" | "seasonal"
   demand_mean: 10.0
   demand_std: 3.0             # used only for gaussian
-  lambda_penalty: 2.0         # λ: weight on unmet demand in reward
+  lambda_penalty: 20.0        # λ: weight on unmet demand in reward
   gamma: 0.99                 # discount factor
   episode_length: 50          # steps per episode
 

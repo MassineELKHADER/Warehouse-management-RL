@@ -49,7 +49,7 @@ class PPOTrainer(BaseTrainer):
         n_epochs: int = 10,
         batch_size: int | None = 64,
         value_coef: float = 0.5,
-        entropy_coef: float = 0.001,
+        entropy_coef: float = 0.0,
     ):
         self.gamma        = gamma
         self.gae_lambda   = gae_lambda

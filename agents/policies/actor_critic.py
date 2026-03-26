@@ -66,7 +66,7 @@ class ActorCriticPolicy(BasePolicy):
 
     def _dist(self, features: torch.Tensor) -> torch.distributions.Normal:
         mean = self.mean_head(features)
-        std  = self.log_std.exp().expand_as(mean)
+        std  = self.log_std.clamp(-4.0, 0.5).exp().expand_as(mean)
         return torch.distributions.Normal(mean, std)
 
     # ------------------------------------------------------------------

@@ -60,7 +60,9 @@ class MLPPolicy(BasePolicy):
     def _dist(self, obs: torch.Tensor) -> torch.distributions.Normal:
         h    = self.net(obs)
         mean = self.mean_head(h)
-        std  = self.log_std.exp().expand_as(mean)
+        # Clamp log_std to [-4, 0.5] → std in [0.018, 1.65]
+        # Prevents entropy bonus from inflating std unboundedly.
+        std  = self.log_std.clamp(-4.0, 0.5).exp().expand_as(mean)
         return torch.distributions.Normal(mean, std)
 
     # ------------------------------------------------------------------
