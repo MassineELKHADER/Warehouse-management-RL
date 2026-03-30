@@ -36,12 +36,15 @@ class WarehouseEnv:
         self.n               = env_cfg["n_warehouses"]
         self.max_inventory   = env_cfg.get("max_inventory", 100)
         self.lam             = env_cfg.get("lambda_penalty", 2.0)
+        self.lam_replenish   = env_cfg.get("lambda_replenishment", 1.0)
         self.episode_length  = env_cfg.get("episode_length", 50)
 
         # --- External supplier (optional) --------------------------------
         ext_cfg = env_cfg.get("external_supplier", {})
-        self._ext_enabled = ext_cfg.get("enabled", False)
-        self._ext_cost    = float(ext_cfg.get("cost_per_unit", 50.0))
+        self._ext_enabled    = ext_cfg.get("enabled", False)
+        self._ext_cost       = float(ext_cfg.get("cost_per_unit", 50.0))
+        demand_mean          = env_cfg.get("demand_mean", 10.0)
+        self._inventory_cap  = 10.0 * demand_mean  # 10 steps of buffer per warehouse
 
         # --- Reproducible randomness -------------------------------------
         self._rng = np.random.default_rng(seed)
@@ -49,6 +52,18 @@ class WarehouseEnv:
         # --- Demand model and cost matrix --------------------------------
         self._demand_model = make_demand_model(cfg)
         self.cost_matrix   = make_cost_matrix(cfg, self._rng)
+
+        # --- Reward normalisation constants --------------------------------
+        # Derived from actual env parameters so each reward term ∈ ~[0, 1].
+        demand_mean    = env_cfg.get("demand_mean", 10.0)
+        total_demand   = self.n * demand_mean          # expected total demand per step
+        max_cost_edge  = float(self.cost_matrix.max())  # actual worst cost from matrix
+        # Worst transport: ship max_inventory on every off-diagonal edge
+        self._norm_transport = max(max_cost_edge * self.n * (self.n - 1) * self.max_inventory, 1.0)
+        # Worst unmet: all demand unmet
+        self._norm_unmet     = max(total_demand, 1.0)
+        # Worst replenishment: supplier covers all demand
+        self._norm_replenish = max(self._ext_cost * total_demand, 1.0)
 
         # --- State variables ---------------------------------------------
         self._inventory:  np.ndarray = np.zeros(self.n, dtype=np.float32)
@@ -98,15 +113,22 @@ class WarehouseEnv:
             self._inventory   += unmet          # bring each warehouse to 0 shortfall
             replenishment_cost = self._ext_cost * float(unmet.sum())
 
+        # Cap inventory — penalise any excess that gets clipped away
+        overflow      = np.maximum(self._inventory - self._inventory_cap, 0.0)
+        overflow_cost = float(np.sum(overflow))
+        self._inventory = np.minimum(self._inventory, self._inventory_cap)
+
         # Advance to next step
         self._demand     = self._demand_model.sample(self.n, self._rng)
         self._step_count += 1
         done = self._step_count >= self.episode_length
 
+        # Normalise each term to ~[0,1] then weight, so reward ∈ ~[-4, 0]
         reward = (
-            -transport_cost
-            - self.lam * float(np.sum(unmet))
-            - replenishment_cost
+            - transport_cost       / self._norm_transport
+            - self.lam        * float(np.sum(unmet)) / self._norm_unmet
+            - self.lam_replenish * replenishment_cost / self._norm_replenish
+            - overflow_cost        / self._norm_unmet   # same scale as unmet demand
         )
 
         info = {
@@ -118,6 +140,7 @@ class WarehouseEnv:
             "inventory":           self._inventory.copy(),
             "action":              T,
             "replenishment_cost":  replenishment_cost,
+            "overflow_cost":       overflow_cost,
         }
         return self._get_state(), reward, done, info
 

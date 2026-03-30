@@ -218,6 +218,11 @@ def main():
 
     # --- Build SB3 model ------------------------------------------------
     # CPU is faster than GPU for tiny MLPs — GPU overhead dominates
+    def linear_schedule(initial_value):
+        def func(progress_remaining):  # 1.0 → 0.0 over training
+            return progress_remaining * initial_value
+        return func
+
     if args.algo == "ppo":
         from stable_baselines3 import PPO
         model = PPO(
@@ -228,11 +233,11 @@ def main():
             n_epochs=10,
             gamma=0.99,
             gae_lambda=0.95,
-            clip_range=0.2,
+            clip_range=linear_schedule(0.2),  # explore early, exploit late
             ent_coef=0.0,
             vf_coef=0.5,
             max_grad_norm=0.5,
-            policy_kwargs={"net_arch": [128, 128]},
+            policy_kwargs={"net_arch": [128, 128], "log_std_init": -1.0},
             seed=args.seed,
             device="cpu",
             verbose=1,

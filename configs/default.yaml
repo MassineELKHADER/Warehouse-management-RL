@@ -7,6 +7,7 @@ env:
   demand_mean: 10.0
   demand_std: 3.0             # used only for gaussian
   lambda_penalty: 20.0        # λ: weight on unmet demand in reward
+  lambda_replenishment: 1.0   # λ_r: weight on external supplier cost in reward
   gamma: 0.99                 # discount factor
   episode_length: 50          # steps per episode
 
